@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
-import 'login_page.dart'; // Import the LoginPage file
+import 'login_page.dart';
+import 'home_page.dart'; // Import the HomePage
+import 'register_page.dart'; // Import the RegisterPage
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
       ),
-      home: LoginPage(), // Set LoginPage as the home screen
+      home: LoginPage(),
+      routes: {
+        '/home': (context) => HomePage(),
+        '/register': (context) => RegisterPage(), // Add RegisterPage route
+      },
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_2/controllers/auth_service.dart';
-import 'RegisterPage.dart';
-
+import 'package:flutter_2/models/user_model.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -12,91 +11,90 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
-  
   void _login() async {
     if (_formKey.currentState!.validate()) {
-      print(_usernameController.text);
-      print(_passwordController.text);
+      setState(() {
+        _isLoading = true;
+      });
 
-      final user = await AuthService().login(_usernameController.text, _passwordController.text);
+      try {
+        final user = await AuthService().login(
+          _usernameController.text,
+          _passwordController.text,
+        );
 
+        if (user != null) {
+          Navigator.pushReplacementNamed(context, '/home');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login failed: Invalid username or password')),
+          );
+        }
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed: $error')),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
+  }
+
+  void _navigateToRegister() {
+    Navigator.pushNamed(context, '/register');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue,
-        title: Text("Login Page"),
-      ),
+      appBar: AppBar(title: Text('Login')),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              SizedBox(height: 20.0),
+            children: [
               TextFormField(
                 controller: _usernameController,
                 decoration: InputDecoration(
-                  hintText: 'Username',
-                  contentPadding: EdgeInsets.all(10.0),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: Color.fromARGB(255, 240, 240, 240),
+                  labelText: 'Username',
+                  border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'กรุณาใส่ Username';
+                    return 'Please enter your username';
                   }
                   return null;
                 },
               ),
-              SizedBox(height: 10.0),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(
-                  hintText: 'Password',
-                  contentPadding: EdgeInsets.all(10.0),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: Color.fromARGB(255, 240, 240, 240),
-                ),
                 obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'กรุณาใส่ Password';
+                    return 'Please enter your password';
                   }
                   return null;
                 },
               ),
-              SizedBox(height: 20.0),
+              SizedBox(height: 16),
               ElevatedButton(
-                child: Text("Login"),
-                onPressed: _login,
+                onPressed: _isLoading ? null : _login,
+                child: _isLoading ? CircularProgressIndicator() : Text('Login'),
               ),
-              SizedBox(height: 20.0),
+              SizedBox(height: 16),
               TextButton(
-                child: Text("ไม่มีบัญชี? Register"),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RegisterPage(),
-                    ),
-                  ).then((newUser) {
-                    
-                  });
-                },
+                onPressed: _navigateToRegister,
+                child: Text('Don\'t have an account? Sign Up'),
               ),
             ],
           ),
